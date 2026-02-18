@@ -1,0 +1,6 @@
+@ImageConvertorAPI_HostAddress = http://localhost:5087
+
+GET {{ImageConvertorAPI_HostAddress}}/api/convert/
+Accept: application/json
+
+###
