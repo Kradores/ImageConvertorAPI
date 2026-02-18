@@ -23,7 +23,7 @@ The project uses:
 
 ## Technologies Used
 
-- .NET 8 (or your target framework)
+- .NET 10
 - ASP.NET Core Web API
 - SixLabors.ImageSharp
 - SixLabors.ImageSharp.Formats.Webp
@@ -41,19 +41,29 @@ cd your-repository
 ```
 
 ### 2. Restore dependencies
-`dotnet restore`
+```bash
+dotnet restore
+```
 
 ### 3. Build the project
-`dotnet build`
+```bash
+dotnet build
+```
 
 ### 4. Run the API
-`dotnet run`
+```bash
+dotnet run
+```
 
 ### 5. Open Swagger UI
 After running, open your browser and navigate to:
-`https://localhost:{PORT}/swagger`
+```bash
+https://localhost:{PORT}/swagger
+```
 or
-`http://localhost:{PORT}/swagger`
+```bash
+http://localhost:{PORT}/swagger
+```
 
 You can now upload images and test the conversion endpoint directly from Swagger.
 
