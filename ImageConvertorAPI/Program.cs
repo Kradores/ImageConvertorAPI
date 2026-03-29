@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var allowedOrigins = builder.Configuration
+    .GetSection("AllowedOrigins")
+    .Get<string[]>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddResponseCompression();
 builder.Services.AddScoped<IImageConversionService, ImageConversionService>();
@@ -31,6 +32,16 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+builder.Services.AddCors(o =>
+{
+    o.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(allowedOrigins!)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -46,6 +57,7 @@ app.UseHttpsRedirection();
 app.UseResponseCompression();
 app.UseRateLimiter();
 
+app.UseCors("AllowFrontend");
 app.MapControllers().RequireRateLimiting("fixed");
 
 app.Run();
