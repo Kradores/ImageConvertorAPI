@@ -29,38 +29,47 @@ public class ImageConversionService : IImageConversionService
 
                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.FileName);
 
-                using var image = Image.Load(file.OpenReadStream());
-
-                foreach (var size in sizes)
+                try
                 {
-                    using var resized = image.Clone(ctx =>
-                        ctx.Resize(new ResizeOptions
-                        {
-                            Mode = ResizeMode.Max,
-                            Size = new Size(size, size)
-                        }));
+                    using var image = Image.Load(file.OpenReadStream());
 
-                    using var temp = new MemoryStream();
-                    var encoder = request.Lossless
-                        ? new WebpEncoder
-                        {
-                            FileFormat = WebpFileFormatType.Lossless
-                        }
-                        : new WebpEncoder
-                        {
-                            Quality = request.Quality,
-                            Method = (WebpEncodingMethod)request.CompressionLevel
-                        };
+                    foreach (var size in sizes)
+                    {
+                        using var resized = image.Clone(ctx =>
+                            ctx.Resize(new ResizeOptions
+                            {
+                                Mode = ResizeMode.Max,
+                                Size = new Size(size, size)
+                            }));
 
-                    resized.Save(temp, encoder);
-                    temp.Position = 0;
+                        using var temp = new MemoryStream();
+                        var encoder = request.Lossless
+                            ? new WebpEncoder
+                            {
+                                FileFormat = WebpFileFormatType.Lossless
+                            }
+                            : new WebpEncoder
+                            {
+                                Quality = request.Quality,
+                                Method = (WebpEncodingMethod)request.CompressionLevel
+                            };
 
-                    var entry = zip.CreateEntry(
-                        $"{fileNameWithoutExt}/{fileNameWithoutExt}-{size}.webp",
-                        CompressionLevel.NoCompression);
-                    using var entryStream = entry.Open();
-                    await temp.CopyToAsync(entryStream, cancellationToken);
+                        resized.Save(temp, encoder);
+                        temp.Position = 0;
+
+                        var entry = zip.CreateEntry(
+                            $"{fileNameWithoutExt}/{fileNameWithoutExt}-{size}.webp",
+                            CompressionLevel.NoCompression);
+                        using var entryStream = entry.Open();
+                        await temp.CopyToAsync(entryStream, cancellationToken);
+                    }
                 }
+                catch (Exception)
+                {
+                    throw new BadHttpRequestException("Invalid image file.");
+                }
+
+                
             }
         }
 

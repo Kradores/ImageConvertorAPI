@@ -27,7 +27,6 @@ public class ConvertController : ControllerBase
     /// <response code="400">Invalid request</response>
     [HttpPost]
     [Consumes("multipart/form-data")]
-    [Produces("application/zip")]
     [RequestSizeLimit(long.MaxValue)]
     public async Task<IActionResult> Convert(
     [FromForm] ConvertRequest request,

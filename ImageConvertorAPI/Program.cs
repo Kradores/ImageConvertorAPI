@@ -1,4 +1,5 @@
 using ImageConvertorAPI.Services;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -53,11 +54,34 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseRateLimiter();
+}
+
+app.UseExceptionHandler(appError =>
+{
+    appError.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+
+        if (exception is BadHttpRequestException badRequest)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync(badRequest.Message);
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    });
+});
+
 app.UseHttpsRedirection();
 app.UseResponseCompression();
-app.UseRateLimiter();
 
 app.UseCors("AllowFrontend");
 app.MapControllers().RequireRateLimiting("fixed");
 
 app.Run();
+
+public partial class Program { }
